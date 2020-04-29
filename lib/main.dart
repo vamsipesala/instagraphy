@@ -93,7 +93,7 @@ class _MyHomePageState extends State<MyHomePage> {
                 Navigator.push(
                   context,
                   MaterialPageRoute(
-                      builder: (context) => ScreenshotPage(username: userIdController.text,)),
+                      builder: (context) => ScreenshotPage(username: userIdController.text, contestId: contestIdController.text,)),
                 );
               },
             )

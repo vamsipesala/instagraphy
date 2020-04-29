@@ -8,19 +8,20 @@ import 'package:image_gallery_saver/image_gallery_saver.dart';
 import 'package:permission_handler/permission_handler.dart';
 
 class ScreenshotPage extends StatelessWidget {
-  ScreenshotPage({@required this.username});
+  ScreenshotPage({@required this.username, @required this.contestId});
   String username;
+  String contestId;
 
   @override
   Widget build(BuildContext context) {
-    return F_ScreenshotPage(username: username,);
+    return F_ScreenshotPage(username: username, contestId: contestId);
   }
 }
 
 class F_ScreenshotPage extends StatefulWidget {
-  F_ScreenshotPage({@required this.username});
+  F_ScreenshotPage({@required this.username, @required this.contestId});
   String username;
-
+  String contestId;
   @override
   _F_ScreenshotPageState createState() => _F_ScreenshotPageState();
 }
