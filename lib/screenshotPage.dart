@@ -1,6 +1,10 @@
 import 'dart:io';
+import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:instagraphy/custom_offline_widget.dart';
+import 'package:instagraphy/database_model/contest_details.dart';
+import 'package:instagraphy/firebase/database.dart';
 import 'loading_page.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:screenshot/screenshot.dart';
@@ -39,6 +43,12 @@ class _F_ScreenshotPageState extends State<F_ScreenshotPage> {
 //  PermissionStatus _permissionStatus = PermissionStatus.undetermined;
 
 //  final myController = TextEditingController();
+
+  dynamic getBackgroundImage(String backgroundImageName) {
+    final ref = FirebaseStorage.instance.ref().child(backgroundImageName);
+    var url = ref.getDownloadURL();
+    return url;
+  }
 
   void initState() {
     // TODO: implement initState
@@ -87,165 +97,185 @@ class _F_ScreenshotPageState extends State<F_ScreenshotPage> {
   }
 
 
+
+
   @override
   Widget build(BuildContext context) {
-    return TransparentLoading(
-      loading: isLoading,
-      child: Scaffold(
-        appBar: AppBar(
-          title: Text('Template Creation'),
+    return CustomOfflineWidget(
+      onlineChild: Padding(
+        padding: const EdgeInsets.fromLTRB(0, 0, 0, 0),
+        child: Scaffold(
+          appBar: AppBar(
+            title: Text('Template Creation'),
+          ),
+          body: _buildContent(context),
         ),
-        body: SingleChildScrollView(
-          child: Center(
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: <Widget>[
-                Screenshot(
-                  controller: screenshotController,
-                  child: Stack(
-                    children: <Widget>[
-                      Container(
-                        height: MediaQuery.of(context).size.width,
-                        width: MediaQuery.of(context).size.width,
-                        child: Image(image: AssetImage('images/Group175.jpg')),
-                      ),
-                      Positioned(
-                        top: 55,
-                        right: 0,
-                        left: 0,
-                        child: Padding(
-                          padding: EdgeInsets.all(10),
-                          child: Container(
-                              color: Colors.transparent,
-                              height: 290,
-                              width: MediaQuery.of(context).size.width,
+      ),
+    );
+  }
+
+
+  @override
+  Widget _buildContent(BuildContext context) {
+    return StreamBuilder<ContestDetails>(
+        stream: DBreference.getContestDetails('2904201308'),
+        builder: (context, snapshot) {
+          final contestData = snapshot.data;
+
+        return TransparentLoading(
+          loading: isLoading,
+          child: SingleChildScrollView(
+            child: Center(
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: <Widget>[
+                  Screenshot(
+                    controller: screenshotController,
+                    child: Stack(
+                      children: <Widget>[
+                        Container(
+                          height: MediaQuery.of(context).size.width,
+                          width: MediaQuery.of(context).size.width,
+                          child: Image.network(getBackgroundImage(contestData.backgroundURL)),
+                        ),
+                        Positioned(
+                          top: 55,
+                          right: 0,
+                          left: 0,
+                          child: Padding(
+                            padding: EdgeInsets.all(10),
+                            child: Container(
+                                color: Colors.transparent,
+                                height: 290,
+                                width: MediaQuery.of(context).size.width,
 //                      width: 200,
-                              child: showImage()
+                                child: showImage()
+                            ),
                           ),
                         ),
-                      ),
-                      Positioned(
-                        top: 10,
-                        right: 10,
-                        child: Row(
-                          children: <Widget>[
-                            Image(image: AssetImage('images/instagramlogo.png'),
-                              height: 30,
-                              width: 30,
-                            ),
-                            SizedBox(width: 3,),
-                            Text('@',
-                              style: TextStyle(
-                                  fontFamily: 'BalooBhaina2',
-                                  fontWeight: FontWeight.bold,
-                                  fontSize: 12
-                              ),),
-                            Text(widget.username,
-                              style: TextStyle(
-                                  fontFamily: 'BalooBhaina2',
-                                  fontWeight: FontWeight.bold,
-                                  fontSize: 12
-                              ),),
+                        Positioned(
+                          top: 10,
+                          right: 10,
+                          child: Row(
+                            children: <Widget>[
+                              Image(image: AssetImage('images/instagramlogo.png'),
+                                height: 30,
+                                width: 30,
+                              ),
+                              SizedBox(width: 3,),
+                              Text('@',
+                                style: TextStyle(
+                                    fontFamily: 'BalooBhaina2',
+                                    fontWeight: FontWeight.bold,
+                                    fontSize: 12
+                                ),),
+                              Text(contestData.contestTitle,
+                                style: TextStyle(
+                                    fontFamily: 'BalooBhaina2',
+                                    fontWeight: FontWeight.bold,
+                                    fontSize: 12
+                                ),),
 
-                          ],
-                        ),
-                      )
-                    ],
-                  ),
-                ),
-                SizedBox(height: 10,),
-
-                Container(
-                  child: FlatButton(
-                    child: Container(
-                      width: 160,
-                      decoration: BoxDecoration(
-                        borderRadius: new BorderRadius.all(Radius.circular(10)),
-                        color: Colors.blue,
-                      ),
-                      child: Padding(
-                        padding: const EdgeInsets.all(10.0),
-                        child: Center(child: Text('Upload Image',
-                          style: TextStyle(
-                            color: Colors.white,
-                            fontSize: 22,
-                          ),)),
-                      ),
+                            ],
+                          ),
+                        )
+                      ],
                     ),
-                    onPressed: () {
-                      setState(() {
-                        isLoading = true;
-//                      logotext = 'Logo';
-                      });
-                      pickImageFromGallery(ImageSource.gallery);
-                      setState(() {
-                        isLoading = false;
-//                      logotext = 'Logo';
-                      });
-                    },
                   ),
-                ),
-                SizedBox(height: 10,),
-                Container(
-                  child: FlatButton(
-                    onPressed: () async{
-                      var status = await Permission.storage.status;
-                      if (status.isUndetermined) {
-                        Permission.storage.request();
-                      }
-//                      setState(() async{
-//
-//                      });
-                     // _imageFile = null;
-                      setState(() {
-                        isLoading = true;
-//                      logotext = 'Logo';
-                      });
-                      screenshotController
-                          .capture(delay: Duration(milliseconds: 10),pixelRatio: 5)
-                          .then((File image) async {
-                        print("Capture Done");
-                        setState(() {
-                          _imageFile = image;
-                          print(_imageFile);
-                        });
-                        await ImageGallerySaver.saveImage(image.readAsBytesSync());
+                  SizedBox(height: 10,),
 
+                  Container(
+                    child: FlatButton(
+                      child: Container(
+                        width: 160,
+                        decoration: BoxDecoration(
+                          borderRadius: new BorderRadius.all(Radius.circular(10)),
+                          color: Colors.blue,
+                        ),
+                        child: Padding(
+                          padding: const EdgeInsets.all(10.0),
+                          child: Center(child: Text('Upload Image',
+                            style: TextStyle(
+                              color: Colors.white,
+                              fontSize: 22,
+                            ),)),
+                        ),
+                      ),
+                      onPressed: () {
+                        setState(() {
+                          isLoading = true;
+//                      logotext = 'Logo';
+                        });
+                        pickImageFromGallery(ImageSource.gallery);
                         setState(() {
                           isLoading = false;
 //                      logotext = 'Logo';
                         });
-//                    print(result);
-                        print("File Saved to Gallery");
-                        circularProgressBar(context);
-
-                      }).catchError((onError) {
-                        print(onError);
-                      });
-                    },
-//                tooltip: 'Increment',
-                    child: Container(
-                      width: 160,
-                      decoration: BoxDecoration(
-                        borderRadius: new BorderRadius.all(Radius.circular(10)),
-                        color: Colors.blue,
-                      ),
-                      child: Padding(
-                        padding: const EdgeInsets.all(10.0),
-                        child: Center(child: Text('Save Image',
-                          style: TextStyle(
-                            color: Colors.white,
-                            fontSize: 25,
-                          ),)),
-                      ),
+                      },
                     ),
                   ),
-                )
-              ],
+                  SizedBox(height: 10,),
+                  Container(
+                    child: FlatButton(
+                      onPressed: () async{
+                        var status = await Permission.storage.status;
+                        if (status.isUndetermined) {
+                          Permission.storage.request();
+                        }
+//                      setState(() async{
+//
+//                      });
+                        // _imageFile = null;
+                        setState(() {
+                          isLoading = true;
+//                      logotext = 'Logo';
+                        });
+                        screenshotController
+                            .capture(delay: Duration(milliseconds: 10),pixelRatio: 5)
+                            .then((File image) async {
+                          print("Capture Done");
+                          setState(() {
+                            _imageFile = image;
+                            print(_imageFile);
+                          });
+                          await ImageGallerySaver.saveImage(image.readAsBytesSync());
+
+                          setState(() {
+                            isLoading = false;
+//                      logotext = 'Logo';
+                          });
+//                    print(result);
+                          print("File Saved to Gallery");
+                          circularProgressBar(context);
+
+                        }).catchError((onError) {
+                          print(onError);
+                        });
+                      },
+//                tooltip: 'Increment',
+                      child: Container(
+                        width: 160,
+                        decoration: BoxDecoration(
+                          borderRadius: new BorderRadius.all(Radius.circular(10)),
+                          color: Colors.blue,
+                        ),
+                        child: Padding(
+                          padding: const EdgeInsets.all(10.0),
+                          child: Center(child: Text('Save Image',
+                            style: TextStyle(
+                              color: Colors.white,
+                              fontSize: 25,
+                            ),)),
+                        ),
+                      ),
+                    ),
+                  )
+                ],
+              ),
             ),
           ),
-        ),
-      ),
+        );
+      }
     );
   }
 }

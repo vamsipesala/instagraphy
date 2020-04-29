@@ -1,4 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+
+import 'firebase/database.dart';
 
 class TransparentLoading extends StatelessWidget {
   final Widget child;
@@ -9,6 +12,8 @@ class TransparentLoading extends StatelessWidget {
       : super(key: key);
   @override
   Widget build(BuildContext context) {
+    DBreference = Provider.of<Database>(context, listen: false);
+
     return Scaffold(
         body: Stack(
           children: <Widget>[
